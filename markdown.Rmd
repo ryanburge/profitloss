@@ -1,0 +1,112 @@
+---
+layout: post
+title: "Profit and Loss Analysis"
+date: 2016-5-26
+output:
+  html_document
+share: true
+categories: blog
+excerpt: "The Usage of the #FundEIU hashtag on Twitter"
+tags: [rstats]
+---
+
+
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(plotly)
+library(DT)
+library(dplyr)
+
+Sys.setenv("plotly_username"="ryanburge")
+Sys.setenv("plotly_api_key"="bvzv16do7x")
+
+all <- read.csv("D:/profitloss/all.csv", stringsAsFactors = FALSE, strip.white = TRUE)
+
+
+all$Year <- trimws(all$Year)
+all$Scholarships <- trimws(all$Scholarships)
+all$Amount <- trimws(all$Amount)
+all$Summer <- trimws(all$Summer)
+all$Amount <- gsub("^[(]", "-", all$Amount)
+all$Amount <- gsub("[)]", "", all$Amount)
+all$Amount <- as.numeric(all$Amount)
+all$Scholarships <- as.numeric(all$Scholarships)
+all$Summer <- as.numeric(all$Summer)
+
+all$Year <- factor(all$Year, levels=unique(all$Year))
+
+all$deducts <- all$Waivers + all$Scholarships
+all$deductper <- all$deducts/all$Total
+
+agg <- aggregate(all$Personnel, list(all$Year), sum)
+agg2 <- aggregate(all$Net.Tuition, list(all$Year), sum)
+agg3 <- aggregate(all$deducts, list(all$Year), sum)
+agg$type <- c("Personnel Expenses")
+agg2$type <- c("Net Tuition")
+agg3$type <- c("Waivers + Scholarships")
+
+
+total <- rbind(agg, agg2, agg3)
+
+
+
+
+
+cah <- filter(all, College == "CAH")
+cos <- filter(all, College == "COS")
+bus <- filter(all, College == "Business")
+ceps <- filter(all, College == "CEPS")
+
+last <- filter(all, Year == "2015-2016")
+
+displaylast <- select(last, Dept, College, Amount, Personnel, Net.Tuition, deductper)
+
+```
+
+```{r message=FALSE, warning=FALSE}
+##Personnel Budget
+arrange(displaylast, desc(Personnel))
+##Net Tuition (After Deductions)
+arrange(displaylast, desc(Net.Tuition))
+##Profit or Loss
+arrange(displaylast, desc(Amount))
+##Percentage Deduction
+arrange(displaylast, desc(deductper))
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+overall <- ggplot(data = total, aes(x = Group.1, y = x/1000, color = type, label = type)) +
+  geom_line(aes(group = type), size=1) + ylab("Dollar Amount (in thousands)") + xlab("Academic Year") + ggtitle("Overall Trends")
+
+cahplot <- ggplot(data = cah, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
+  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)") + ggtitle("College Arts and Humanities")
+
+cosplot <- ggplot(data = cos, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
+  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)") + ggtitle("College of Science")
+
+cepsplot <- ggplot(data = ceps, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
+  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)")+ ggtitle("College of Education and Professional studies")
+busplot <- ggplot(data = bus, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
+  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)")+ ggtitle("College of Business")
+
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12}
+overall
+cahplot
+cosplot
+cepsplot
+busplot
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(data = cah, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College Arts and Humanities")
+
+ggplot(data = cos, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Science")
+
+ggplot(data = ceps, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Education and Professional studies")
+
+ggplot(data = bus, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Business")
+```

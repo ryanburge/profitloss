@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "Profit and Loss Analysis"
-date: 2016-5-26
+date: 2016-9-27
 output:
   html_document
 share: true
@@ -47,12 +47,7 @@ agg$type <- c("Personnel Expenses")
 agg2$type <- c("Net Tuition")
 agg3$type <- c("Waivers + Scholarships")
 
-
 total <- rbind(agg, agg2, agg3)
-
-
-
-
 
 cah <- filter(all, College == "CAH")
 cos <- filter(all, College == "COS")
@@ -72,7 +67,7 @@ arrange(displaylast, desc(Personnel))
 arrange(displaylast, desc(Net.Tuition))
 ##Profit or Loss
 arrange(displaylast, desc(Amount))
-##Percentage Deduction
+##Percentage Deducted Through Waivers and Scholarships
 arrange(displaylast, desc(deductper))
 ```
 
@@ -81,7 +76,7 @@ overall <- ggplot(data = total, aes(x = Group.1, y = x/1000, color = type, label
   geom_line(aes(group = type), size=1) + ylab("Dollar Amount (in thousands)") + xlab("Academic Year") + ggtitle("Overall Trends")
 
 cahplot <- ggplot(data = cah, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
-  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)") + ggtitle("College Arts and Humanities")
+  geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)") + ggtitle("College of Arts and Humanities")
 
 cosplot <- ggplot(data = cos, aes(x = Year, y = Amount/1000, color = Dept, label = Dept)) +
   geom_line(aes(group = Dept), size=1) + geom_hline(yintercept = 0, linetype = "longdash") + ylab("Profit/Loss (in thousands)") + ggtitle("College of Science")
@@ -94,19 +89,24 @@ busplot <- ggplot(data = bus, aes(x = Year, y = Amount/1000, color = Dept, label
 ```
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12}
-overall
-cahplot
-cosplot
-cepsplot
-busplot
+ggplotly(overall)
+ggplotly(cahplot)
+ggplotly(cosplot)
+ggplotly(cepsplot)
+ggplotly(busplot)
 ```
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
-ggplot(data = cah, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College Arts and Humanities")
+ggplot(data = cah, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Arts and Humanities")
 
-ggplot(data = cos, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Science")
+ggplot(data = cos, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Science")
 
-ggplot(data = ceps, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Education and Professional studies")
+ggplot(data = ceps, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Education and Professional studies")
 
-ggplot(data = bus, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Total Expenses") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Business")
+ggplot(data = bus, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Business")
+```
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+all$deductper <- round(all$deductper, digits = 3)
+all$X <- NULL
+datatable(all)
 ```

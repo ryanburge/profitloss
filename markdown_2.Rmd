@@ -1,0 +1,102 @@
+---
+layout: post
+title: "Profit and Loss Analysis"
+date: 2016-9-29
+output:
+  html_document
+share: true
+categories: blog
+excerpt: "The Usage of the #FundEIU hashtag on Twitter"
+tags: [rstats]
+---
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(ggplot2)
+library(plotly)
+library(DT)
+library(dplyr)
+
+Sys.setenv("plotly_username"="ryanburge")
+Sys.setenv("plotly_api_key"="bvzv16do7x")
+
+all <- read.csv("D:/profitloss/all.csv", stringsAsFactors = FALSE, strip.white = TRUE)
+
+
+all$Year <- trimws(all$Year)
+all$Scholarships <- trimws(all$Scholarships)
+all$Amount <- trimws(all$Amount)
+all$Summer <- trimws(all$Summer)
+all$Amount <- gsub("^[(]", "-", all$Amount)
+all$Amount <- gsub("[)]", "", all$Amount)
+all$Amount <- as.numeric(all$Amount)
+all$Scholarships <- as.numeric(all$Scholarships)
+all$Summer <- as.numeric(all$Summer)
+
+all$Year <- factor(all$Year, levels=unique(all$Year))
+
+all$deducts <- all$Waivers + all$Scholarships
+all$deductper <- all$deducts/all$Total
+
+
+cah <- filter(all, College == "CAH")
+cos <- filter(all, College == "COS")
+bus <- filter(all, College == "Business")
+ceps <- filter(all, College == "CEPS")
+
+first <- filter(all, Year == "2011-2012")
+last <- filter(all, Year == "2015-2016")
+```
+
+###Decline in Personnel Expenses by College and Department
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(data = cah, aes(x = Year, y = Personnel/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Personnel Expenses (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Arts and Humanities")
+
+
+ggplot(data = cos, aes(x = Year, y = Personnel/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Personnel Expenses (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Science")
+
+ggplot(data = ceps, aes(x = Year, y = Personnel/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Personnel Expenses (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Education and Professional Studies")
+
+ggplot(data = bus, aes(x = Year, y = Personnel/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Personnel Expenses (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Business")
+```
+
+###Decline in Net Tuition by College and Department
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot(data = cah, aes(x = Year, y = Net.Tuition/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Net Tuition (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Arts and Humanities")
+
+
+ggplot(data = cos, aes(x = Year, y = Net.Tuition/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Net Tuition (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash")+ ggtitle("College of Science")
+
+ggplot(data = ceps, aes(x = Year, y = Net.Tuition/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Net Tuition (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Education and Professional Studies")
+
+ggplot(data = bus, aes(x = Year, y = Net.Tuition/1000)) + geom_bar(aes(group = Dept),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Net Tuition (in thousands)" ) + geom_hline(yintercept = 0, linetype = "longdash")+ ggtitle("Business")
+```
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+
+first$famount <- first$Personnel
+first$lamount <- last$Personnel
+first$persondiff <-  1- (first$lamount/first$famount)
+first$persondiff2 <-  (first$lamount/first$famount)
+first$netfamount <- first$Net.Tuition
+first$netlamount <- last$Net.Tuition
+first$tuitiondiff <- 1- (first$netlamount/first$netfamount)
+first$tuitiondiff2 <- (first$netlamount/first$netfamount)
+first$totaldiff <- first$persondiff2 - first$tuitiondiff2
+diff <- select(first, Dept, College, persondiff, tuitiondiff, totaldiff)
+```
+
+
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
+ggplot(diff, aes(x=reorder(Dept, -persondiff), y = persondiff)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Personnel Cuts from AY2011-AY2015 (Percentage)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Personnel Reductions (by Percentage) From AY2011-AY2015")
+
+ ggplot(diff, aes(x=reorder(Dept, -tuitiondiff), y = tuitiondiff)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Tuition Loss from AY2011-AY2015 (Percentage)") + geom_segment(aes(x = 27, y = -.35, xend = 29.5, yend = -.25), arrow = arrow(length = unit(.5, "cm"))) + annotate("text", x = 22.5, y = -.40, label = "Depts with Positive Tuition Growth") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Tuition Losses (by Percentage) From AY2011-AY2015 ")
+
+ggplot(diff, aes(x=reorder(Dept, -totaldiff), y = totaldiff)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + annotate("text", x = 12.5, y = .75, label = "Depts Where Personnel Cut Haven't Kept Pace w/Tuition Declines") + annotate("rect", xmin = 0, xmax = 26, ymin = 0, ymax = 1,  alpha = .2) +xlab("Department") + ylab("Difference between Personnel Cuts and Tuition Declines") + geom_vline(xintercept = 26, linetype = "longdash") + ggtitle("Differences Between Personnel Reduction and Tuition Losses From AY2011-AY2015" )
+
+
+
+```

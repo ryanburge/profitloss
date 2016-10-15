@@ -55,9 +55,6 @@ bus <- filter(all, College == "Business")
 ceps <- filter(all, College == "CEPS")
 
 last <- filter(all, Year == "2015-2016")
-last$tuition10 <- last$Total.Expenses - (last$Net.Tuition*1.1)
-last$tuition10 <- last$tuition10*(-1)
-
 
 displaylast <- select(last, Dept, College, Amount, Personnel, Net.Tuition, deductper)
 
@@ -108,15 +105,6 @@ ggplot(data = ceps, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + 
 
 ggplot(data = bus, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Business")
 ```
-
-
-```{r message=FALSE, warning=FALSE, echo=FALSE}
-ggplot(last, aes(x=reorder(Dept, -Amount), y = Amount/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Profit or Loss (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss in AY2015-2016")
-
-ggplot(last, aes(x=reorder(Dept, -tuition10), y = tuition10/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Profit or Loss (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss if Net Tuition Rose 10%")
-
-```
-
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 all$deductper <- round(all$deductper, digits = 3)
 all$X <- NULL

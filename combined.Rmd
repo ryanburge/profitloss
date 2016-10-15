@@ -1,9 +1,10 @@
 ---
 layout: post
 title: "Profit and Loss Analysis"
-date: 2016-10-10
+date: 2016-10-15
 output:
-  html_document
+  html_document:
+    css: style.css
 share: true
 categories: blog
 excerpt: "The Usage of the #FundEIU hashtag on Twitter"
@@ -52,6 +53,9 @@ agg$type <- c("Personnel Expenses")
 agg2$type <- c("Net Tuition")
 agg3$type <- c("Waivers + Scholarships")
 agg4$type <- c("Total Expenses")
+agg5 <- aggregate(all$Amount, list(all$Dept), sum)
+
+
 
 total <- rbind(agg, agg2, agg3, agg4)
 
@@ -62,6 +66,7 @@ ceps <- filter(all, College == "CEPS")
 
 last <- filter(all, Year == "2015-2016")
 first <- filter(all, Year == "2011-2012")
+agg5$College <- last$College
 
 
 last$tuition10 <- last$Total.Expenses - (last$Net.Tuition*1.1)
@@ -165,22 +170,30 @@ ggplot(diff, aes(x=reorder(Dept, -persondiff), y = persondiff*100)) + geom_bar(a
 
  ggplot(diff, aes(x=reorder(Dept, -tuitiondiff), y = tuitiondiff*100)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Tuition Loss from AY2011-AY2015 (Percentage)") + geom_segment(aes(x = 25, y = -35, xend = 27.5, yend = -25), arrow = arrow(length = unit(.5, "cm"))) + annotate("text", x = 22.5, y = -40, label = "Depts with Positive Tuition Growth") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Tuition Losses (by Percentage) From AY2011-AY2015 ")
 
-ggplot(diff, aes(x=reorder(Dept, -totaldiff), y = totaldiff*100)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + annotate("text", x = 12.5, y = 55, label = "Depts Where Personnel Cut Haven't Kept Pace w/Tuition Declines") + annotate("rect", xmin = 0, xmax = 25, ymin = 0, ymax = 50,  alpha = .2) +xlab("Department") + ylab("Difference between Personnel Cuts and Tuition Declines") + geom_vline(xintercept = 25, linetype = "longdash") + ggtitle("Differences Between Personnel Reduction and Tuition Losses From AY2011-AY2015" )
+ggplot(diff, aes(x=reorder(Dept, -totaldiff), y = totaldiff*100)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) + annotate("text", x = 12.5, y = 55, label = "Depts Where Personnel Cut Haven't Kept Pace w/Tuition Declines") + annotate("rect", xmin = 0, xmax = 26, ymin = 0, ymax = 50,  alpha = .2) +xlab("Department") + ylab("Difference between Personnel Cuts and Tuition Declines") + geom_vline(xintercept = 26, linetype = "longdash") + ggtitle("Differences Between Personnel Reduction and Tuition Losses From AY2011-AY2015" )
 ```
 
 ###Growth Scenarios 
 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
-ggplot(last, aes(x=reorder(Dept, -Amount), y = Amount/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Profit or Loss By Department (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss in AY2015-2016") + geom_vline(xintercept = 16, linetype = "longdash")
+ggplot(last, aes(x=reorder(Dept, -Amount), y = Amount/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Profit or Loss By Department (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss in AY2015-2016") + geom_vline(xintercept = 17, linetype = "longdash")
 ggplot(last, aes(x=reorder(Dept, -tuition15), y = tuition15/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Personnel Cuts from AY2011-AY2015 (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss if Net Tuition Rose 15%") + geom_vline(xintercept = 20, linetype = "longdash")
 
 compare <- select(first, Dept, College, Net.Tuition)
 compare$Personnel <- last$Personnel
 compare$diff <- compare$Net.Tuition - compare$Personnel
-ggplot(compare, aes(x=reorder(Dept, -diff), y = diff/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Personnel Cuts from AY2011-AY2015 (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss if Net Tuition was at AY2011-2012 Levels") + geom_vline(xintercept = 28, linetype = "longdash")
+ggplot(compare, aes(x=reorder(Dept, -diff), y = diff/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Personnel Cuts from AY2011-AY2015 (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Profit or Loss if Net Tuition was at AY2011-2012 Levels") + geom_vline(xintercept = 29, linetype = "longdash")
+```
 
 
+###How are the Losses Spread Across Departments?
+
+```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
+ggplot(agg5, aes(x=reorder(Group.1, -x), y = x/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Dollar Amount (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Total Profit/Loss by Department From AY2011-AY2015")
+losers <- filter(agg5, x < 0)
+losers$percent <- losers$x/sum(losers$x)
+ggplot(losers, aes(x=reorder(Group.1, -percent), y = percent*100)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Percent of Total Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Which Departments Have Accounted for the Biggest Losses?")
 ```
 
 

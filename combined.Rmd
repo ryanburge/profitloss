@@ -84,6 +84,7 @@ displaylast <- select(last, Dept, College, Amount, Personnel, Net.Tuition, deduc
 
 ###Trends in Profit and Loss by College and Department
 
+The following graphs are interactive. Mouse over each data point and additional data will be displayed. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 overall <- ggplot(data = total, aes(x = Group.1, y = x/1000, color = type, label = type)) +
@@ -111,6 +112,8 @@ ggplotly(busplot)
 ```
 
 ### Each Department Individually
+
+These are merely each indivdiual department getting its own graph in order to see more clearly the trend for each department. The horizontal dashed line is the break even point. The y-axis is consistent for each college in order to visually compare the size of each profit or loss.
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 ggplot(data = cah, aes(x = Year, y = Amount)) + geom_line(aes(group = Dept)) + theme(axis.text.x = element_text(angle = 90)) + facet_wrap(~Dept) + ylab("Profit or Loss") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("College of Arts and Humanities")
@@ -163,7 +166,15 @@ first$totaldiff <- first$persondiff2 - first$tuitiondiff2
 diff <- select(first, Dept, College, persondiff, tuitiondiff, totaldiff)
 ```
 
-#Changes Across the Entire Time Frame (AY2011-2015)
+#Changes From AY2011-2015
+
+The following graphs may be the most important. 
+
+Graph 1- Which departments have been cut the most in regard to personnel from AY2011 to AY2015? Those on the far left have seen the largest reductions (by percentage), and those on the far right have been cut the least over that five year time period.
+
+Graph 2- Which departments have had the largest loss in net tuition? Again, those on the left have had the largest declines from AY2011-AY2015. A few departments on the right have seen positive tuition growth. 
+
+Graph 3- This graph depicts the difference between the percentage of personnel reductions and the percentage decrease in net tuition revenue. Net tuition is calculated by taking total tuition and then deducting both waivers and scholarships. Those departments on the far left of the graph have not seen their personnel cuts keep pace with the decrease that they have experienced in net tuition. Those departments on the far right of the graph have seen total net tuition increases but have not seen a corresponding increase in personnel. The vertical dashed line falls directly on the Communication department, as it's drop in personnel expenses has moved almost completely in lock step with it's overall decrease in net tuition, and therefore has been treated the most "fairly" in the last five years.  
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
 ggplot(diff, aes(x=reorder(Dept, -persondiff), y = persondiff*100)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Personnel Cuts from AY2011-AY2015 (Percentage)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Personnel Reductions (by Percentage) From AY2011-AY2015")
@@ -174,6 +185,14 @@ ggplot(diff, aes(x=reorder(Dept, -totaldiff), y = totaldiff*100)) + geom_bar(aes
 ```
 
 ###Growth Scenarios 
+
+What would each department look like in different growth scenarios? 
+
+Graph 1- Profit and loss for each department in AY2015-2016. The vertical dashed line is the break even point. 
+
+Graph 2- Profit and loss if tuition rose 15% across the board and expenses were held constant. 
+
+Graph 3- Profit and loss if expenses were at the AY2015-2016 level, but tuition returned to the AY2011-2012 level. 
 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
@@ -189,6 +208,11 @@ ggplot(compare, aes(x=reorder(Dept, -diff), y = diff/1000)) + geom_bar(aes(fill=
 
 ###How are the Losses Spread Across Departments?
 
+Graph 1- This graph displays total profits or losses across the five year time frame in the data. Departments above the x-axis had profit for the time period. Departments below the x-axis had total losses for the time period. The y-axis is in thousands of dollars as well (i.e. Sociology generated nearly 8 million dollars in profit)
+
+Graph 2- This graph only looks at the departments who had a net loss in the time period and indicates what percentage of the total loss was due to their balance sheet. The y-axis is percentage of total loss. The total loss for these departments was $24.2 million for the time period. 
+
+
 ```{r message=FALSE, warning=FALSE, echo=FALSE, fig.width=12, fig.height=8}
 ggplot(agg5, aes(x=reorder(Group.1, -x), y = x/1000)) + geom_bar(aes(fill=College),stat="identity") + theme(axis.text.x = element_text(angle = 90)) +xlab("Department") + ylab("Dollar Amount (in Thousands)") + geom_hline(yintercept = 0, linetype = "longdash") + ggtitle("Total Profit/Loss by Department From AY2011-AY2015")
 losers <- filter(agg5, x < 0)
@@ -198,6 +222,8 @@ ggplot(losers, aes(x=reorder(Group.1, -percent), y = percent*100)) + geom_bar(ae
 
 
 ###Search the Data Yourself
+
+This allows you to look at the raw data yourself. Just type a query into the search box on the right and you can search for specific departments, specific colleges, years, etc. You can also sort by clicking the up or down arrows in each column. 
 
 ```{r message=FALSE, warning=FALSE, echo=FALSE}
 datatable <- select(all, Dept, College, Year, Personnel, Other.Expenses, Total, Net.Tuition, Amount)

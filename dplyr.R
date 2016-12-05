@@ -36,5 +36,5 @@ agg5 <- aggregate(all$Amount, list(all$Dept), sum)
 a1 <- all %>% group_by(Year) %>% summarise(per_exp = sum(Personnel), net_tuition = sum(Net.Tuition), deduct_total = sum(deducts))
 a2 <- melt(a1, id= "Year")
 ggplot(a2, aes(x=Year, y=value/1000, colour = variable, group = variable)) + geom_line() + 
-  scale_colour_hue(name= "", labels=c("Personnel Expenses", "Net Tuition", "Deductions")) + ylab("Dollar Amount (in Thousands)")
+  scale_colour_hue(name= "", labels=c("Net Tuition", "Personnel Expenses", "Deductions")) + ylab("Dollar Amount (in Thousands)")
 
